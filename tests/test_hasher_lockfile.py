@@ -6,6 +6,7 @@ import tomllib
 from pathlib import Path
 
 import pytest
+from pydantic import ValidationError
 from typer.testing import CliRunner
 
 from antibody.cli import app
@@ -130,9 +131,10 @@ def test_verify_lockfile_reports_tamper_missing_and_traversal(tmp_path: Path) ->
         schema_version="0.1", registry_url="x", installed=(_entry("core/gone", "c" * 64),)
     )
     assert "not found" in verify_lockfile(tmp_path, missing)[0]
-    escape = good.model_copy(update={"install_path": "../outside"})
-    evil = Lockfile(schema_version="0.1", registry_url="x", installed=(escape,))
-    assert "outside" in verify_lockfile(tmp_path, evil)[0]
+    # A lockfile entry pointing anywhere but its own pack dir is refused at parse time.
+    escape = {**good.model_dump(), "install_path": "../outside"}
+    with pytest.raises(ValidationError, match="install_path must be"):
+        LockEntry.model_validate(escape)
 
 
 def test_cli_verify_detects_one_byte_tamper_in_rule_toml(workspace: Path) -> None:

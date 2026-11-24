@@ -83,7 +83,16 @@ class RegistryClient:
         mirror.parent.mkdir(parents=True, exist_ok=True)
         scratch = Path(tempfile.mkdtemp(dir=mirror.parent, prefix=".clone-"))
         try:
-            cmd = ["git", "clone", "--depth", "1", "--quiet", self.url[4:], str(scratch / "repo")]
+            cmd = [
+                "git",
+                "clone",
+                "--depth",
+                "1",
+                "--quiet",
+                "--",
+                self.url[4:],
+                str(scratch / "repo"),
+            ]
             env = {**os.environ, "GIT_TERMINAL_PROMPT": "0"}
             subprocess.run(cmd, check=True, capture_output=True, text=True, env=env)
             replace_dir(scratch / "repo", mirror, scratch)

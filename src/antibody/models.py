@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from typing import Annotated, Literal
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, Field
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, model_validator
 
 SLUG = r"^[a-z0-9][a-z0-9-]*$"
 SEMVER = r"^\d+\.\d+\.\d+$"
@@ -121,6 +121,15 @@ class LockEntry(_Frozen):
     sha256: Sha256
     install_path: str
     agents_md_patched: bool
+
+    @model_validator(mode="after")
+    def _derived_install_path(self) -> LockEntry:
+        # antibody.lock is committed and therefore untrusted: `remove`/`sync` delete and
+        # replace install_path, so it may only ever be the pack's own directory.
+        expected = f".flywire/packs/{self.id}"
+        if self.install_path != expected:
+            raise ValueError(f"install_path must be {expected!r} (got {self.install_path!r})")
+        return self
 
 
 class Lockfile(_Frozen):

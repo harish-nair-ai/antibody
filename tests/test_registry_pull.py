@@ -428,3 +428,35 @@ def test_sync_without_lockfile_is_usage_error(workspace: Path) -> None:
     with pytest.raises(AntibodyError) as exc:
         sync(workspace, RegistryClient(BUNDLED_URL))
     assert exc.value.exit_code == 2
+
+
+def test_tampered_lock_install_path_cannot_delete_user_files(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A committed antibody.lock is untrusted: install_path must be the derived pack dir."""
+    monkeypatch.chdir(tmp_path)
+    git(tmp_path, "init", "-q")
+    runner = CliRunner()
+    assert runner.invoke(app, ["pull", "core/python-safety"]).exit_code == 0
+    (tmp_path / "src").mkdir()
+    (tmp_path / "src" / "app.py").write_text("x = 1\n")
+    lock = tmp_path / "antibody.lock"
+    lock.write_text(
+        lock.read_text().replace(
+            'install_path = ".flywire/packs/core/python-safety"', 'install_path = "src"'
+        )
+    )
+    result = runner.invoke(app, ["remove", "core/python-safety"])
+    assert result.exit_code != 0
+    assert (tmp_path / "src" / "app.py").read_text() == "x = 1\n"
+
+
+def test_git_registry_url_cannot_inject_git_options(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("XDG_CACHE_HOME", str(tmp_path / "cache"))
+    pwned = tmp_path / "PWNED"
+    result = CliRunner().invoke(app, ["search", "--registry", f"git+--upload-pack=touch {pwned}"])
+    assert result.exit_code == 2
+    assert not pwned.exists()
