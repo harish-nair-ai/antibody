@@ -75,6 +75,11 @@ def test_test_command_runs_gates_and_real_pytest_evals(workspace: Path, tmp_path
     failing = runner.invoke(app, ["test", str(pack)])
     assert failing.exit_code == 11
     assert "1 failed" in failing.stdout
+    assert failing.stderr.startswith(f"error: {pack}: evals failed: ")
+    assert "test_extra" in failing.stderr
+    (pack / "evals/fixtures/sh-no-sudo/positive.sh").write_text("ls\n")
+    gate = runner.invoke(app, ["test", str(pack)])
+    assert f"{pack}: gate positive_antigen sh-no-sudo failed" in gate.stderr
 
 
 def test_test_command_on_installed_packs(workspace: Path) -> None:

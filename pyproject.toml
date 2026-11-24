@@ -19,6 +19,7 @@ dependencies = [
     "tree-sitter-typescript>=0.23.0",
     "pathspec>=0.12.0",
     "tomlkit>=0.13.0",
+    "pytest>=8.2.0",  # `antibody test` runs pack evals with `python -m pytest`
 ]
 
 [project.optional-dependencies]
