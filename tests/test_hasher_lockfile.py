@@ -6,9 +6,9 @@ import tomllib
 from pathlib import Path
 
 import pytest
-from antibody.cli import app
 from typer.testing import CliRunner
 
+from antibody.cli import app
 from antibody.errors import AntibodyError
 from antibody.models import LockEntry, Lockfile
 from antibody.registry.hasher import tree_files, tree_sha256

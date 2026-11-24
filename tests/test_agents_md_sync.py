@@ -5,10 +5,10 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from antibody.cli import app
 from helpers import make_registry
 from typer.testing import CliRunner
 
+from antibody.cli import app
 from antibody.errors import AntibodyError
 from antibody.installer.agents_md_sync import remove_block, upsert_block
 from antibody.installer.pack_installer import pull, remove

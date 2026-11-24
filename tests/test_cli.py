@@ -7,9 +7,10 @@ import sys
 from pathlib import Path
 
 import pytest
-from antibody.cli import app
 from helpers import make_pack
 from typer.testing import CliRunner
+
+from antibody.cli import app
 
 COMMANDS = ["search", "pull", "remove", "sync", "verify", "test", "lint", "distill"]
 ANTIBODY = Path(sys.executable).parent / "antibody"

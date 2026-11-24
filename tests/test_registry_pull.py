@@ -13,11 +13,11 @@ from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
-from antibody.cli import app
 from conftest import git
 from helpers import make_registry, reindex
 from typer.testing import CliRunner
 
+from antibody.cli import app
 from antibody.errors import AntibodyError, GateFailure, IntegrityError
 from antibody.installer import envelope_sync
 from antibody.installer.pack_installer import parse_pack_ref, pull, remove, sync
