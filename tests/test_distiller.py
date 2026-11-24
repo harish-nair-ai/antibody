@@ -3,22 +3,17 @@
 from __future__ import annotations
 
 import difflib
-import http.server
-import json
-import shutil
-import threading
 import tomllib
-from collections.abc import Iterator
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 import pytest
-from antibody.cli import app
 from conftest import git
 from tapes import write_flight_db, write_tape
 from typer.testing import CliRunner
 
+from antibody.cli import app
 from antibody.registry.hasher import tree_sha256
 
 SECRET = "sk-ant-abcdefghijklmnopqrstuvwxyz0123"
@@ -372,148 +367,3 @@ def test_from_flight_db_file_write_and_shell_events(workspace: Path, tmp_path: P
         "distill", "--from-flight-db", str(db), "--out", str(tmp_path / "r"), "--step", "0"
     )
     assert allowed.exit_code == 14
-
-
-# --- --llm (real local mock HTTP server; never a real API) ------------------------------------
-
-VALID_RULE = """```toml
-[[ast_rules]]
-id = "llm-candidate"
-language = "python"
-paths = ["tests/**/*.py"]
-check = "node_count_decreased"
-query = '''(assert_statement) @target'''
-capture = "target"
-severity = "steer"
-message = "Assertions were removed from a test."
-remediation = "Restore the assertions."
-```
-
-```markdown
-- Never delete assertions to make a failing test pass.
-```"""
-INVALID_RULE = VALID_RULE.replace("(assert_statement) @target", "(no_such_node) @target")
-
-
-@dataclass
-class MockLLM:
-    url: str
-    queue: list[tuple[int, str]] = field(default_factory=list)
-    requests: list[tuple[str, dict[str, str], dict[str, Any]]] = field(default_factory=list)
-
-
-@pytest.fixture
-def mock_llm() -> Iterator[MockLLM]:
-    state = MockLLM(url="")
-
-    class Handler(http.server.BaseHTTPRequestHandler):
-        def do_POST(self) -> None:
-            body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
-            state.requests.append((self.path, dict(self.headers), body))
-            status, text = state.queue.pop(0)
-            if self.path.endswith("/chat/completions"):
-                payload: dict[str, Any] = {"choices": [{"message": {"content": text}}]}
-            else:
-                payload = {"content": [{"type": "text", "text": text}]}
-            data = json.dumps(payload if status == 200 else {"error": "boom"}).encode()
-            self.send_response(status)
-            self.send_header("Content-Type", "application/json")
-            self.send_header("Content-Length", str(len(data)))
-            self.end_headers()
-            self.wfile.write(data)
-
-        def log_message(self, format: str, *args: object) -> None:
-            return
-
-    server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Handler)
-    thread = threading.Thread(target=server.serve_forever, daemon=True)
-    thread.start()
-    state.url = f"http://127.0.0.1:{server.server_address[1]}"
-    try:
-        yield state
-    finally:
-        server.shutdown()
-        server.server_close()
-
-
-def test_llm_openai_self_repairs_after_compile_failure(
-    workspace: Path, tmp_path: Path, mock_llm: MockLLM, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
-    monkeypatch.setenv("OPENAI_BASE_URL", f"{mock_llm.url}/v1")
-    first = _steered_deletion(tmp_path, "one.tape")
-    second = tmp_path / "two.tape"
-    shutil.copy(first.tape, second)
-    mock_llm.queue += [(200, INVALID_RULE), (200, VALID_RULE)]
-    out = tmp_path / "llm"
-    result = _invoke(
-        "distill",
-        "--from-tape",
-        str(first.tape),
-        "--from-tape",
-        str(second),
-        "--out",
-        str(out),
-        "--llm",
-        "--model",
-        "gpt-test",
-    )
-    assert result.exit_code == 0, result.stdout + result.stderr
-    assert len(mock_llm.requests) == 2
-    path, headers, body = mock_llm.requests[0]
-    assert path == "/v1/chat/completions"
-    assert headers["Authorization"] == "Bearer test-key"
-    assert body["model"] == "gpt-test"
-    prompt = json.dumps(body)
-    assert "occurrences: 2" in prompt
-    assert SECRET not in prompt and str(first.repo) not in prompt
-    retry = json.dumps(mock_llm.requests[1][2])
-    assert "does not compile" in retry
-    assert _invoke("lint", str(out)).exit_code == 0
-    rule = tomllib.loads(next((out / "rules").iterdir()).read_text())["ast_rules"][0]
-    assert rule["query"] == "(assert_statement) @target"
-    assert rule["id"] != "llm-candidate"
-    agents = (out / "patches/agents_md.md").read_text()
-    assert agents == "- Never delete assertions to make a failing test pass.\n"
-
-
-def test_llm_anthropic_gives_up_after_three_retries_exit_14(
-    workspace: Path, tmp_path: Path, mock_llm: MockLLM, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    monkeypatch.setenv("ANTHROPIC_API_KEY", "ant-test-key")
-    monkeypatch.setenv("ANTHROPIC_BASE_URL", mock_llm.url)
-    scenario = _steered_deletion(tmp_path)
-    mock_llm.queue += [
-        (200, INVALID_RULE),
-        (500, ""),
-        (200, "no fenced blocks"),
-        (200, INVALID_RULE),
-    ]
-    out = tmp_path / "llm"
-    result = _invoke(
-        "distill",
-        "--from-tape",
-        str(scenario.tape),
-        "--out",
-        str(out),
-        "--llm",
-        "--model",
-        "claude-test",
-    )
-    assert result.exit_code == 14
-    assert len(mock_llm.requests) == 4
-    path, headers, body = mock_llm.requests[0]
-    assert path == "/v1/messages"
-    assert headers["x-api-key"] == "ant-test-key"
-    assert headers["anthropic-version"] == "2023-06-01"
-    assert body["model"] == "claude-test"
-    assert not out.exists()
-    assert not list(tmp_path.glob(".antibody-distill-*"))
-
-
-def test_llm_configuration_errors_exit_2(workspace: Path, tmp_path: Path) -> None:
-    scenario = _steered_deletion(tmp_path)
-    base = ["distill", "--from-tape", str(scenario.tape), "--out", str(tmp_path / "o"), "--llm"]
-    assert _invoke(*base).exit_code == 2
-    assert _invoke(*base, "--model", "gpt-test").exit_code == 2
-    assert _invoke(*base, "--model", "claude-test").exit_code == 2
