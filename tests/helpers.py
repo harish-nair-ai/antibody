@@ -101,3 +101,19 @@ def make_pack(root: Path, name: str = "demo", version: str = "0.1.0") -> Path:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text)
     return root
+
+
+def make_registry(root: Path, *names: str, version: str = "0.1.0") -> Path:
+    """A static registry dir: `packs/acme/<name>/` per name + an index.json from our hasher."""
+    from antibody.registry.index_builder import build_index, write_index
+
+    for name in names or ("demo",):
+        make_pack(root / "packs" / "acme" / name, name=name, version=version)
+    write_index(root, build_index(root, generated_at="2026-11-24T00:00:00Z"))
+    return root
+
+
+def reindex(root: Path) -> None:
+    from antibody.registry.index_builder import build_index, write_index
+
+    write_index(root, build_index(root, generated_at="2026-11-24T00:00:00Z"))
