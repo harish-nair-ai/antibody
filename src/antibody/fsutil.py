@@ -47,3 +47,11 @@ def find_workspace_root(start: Path) -> Path:
         if (candidate / "envelope.toml").exists() or (candidate / ".git").exists():
             return candidate
     return start
+
+
+def replace_dir(new: Path, dest: Path, scratch: Path) -> None:
+    """Move `new` onto `dest`; an existing `dest` is first moved aside into `scratch`."""
+    if dest.exists():
+        os.replace(dest, scratch / "old")
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    os.replace(new, dest)
