@@ -21,7 +21,7 @@ from urllib.parse import quote, unquote, urlparse
 import httpx
 from pydantic import ValidationError
 
-from antibody.errors import AntibodyError
+from antibody.errors import AntibodyError, describe
 from antibody.fsutil import atomic_write, replace_dir, resolve_inside
 from antibody.models import Index, IndexPack, IndexVersion
 
@@ -124,14 +124,18 @@ class RegistryClient:
                         f"cannot reach registry {self.url} ({exc}); no cached copy"
                     ) from exc
                 _warn(f"using cached registry for {self.url} ({exc})")
-            except (ValueError, ValidationError) as exc:
+            except ValidationError as exc:
+                raise AntibodyError(f"invalid index.json at {self.url}: {describe(exc)}") from exc
+            except ValueError as exc:
                 raise AntibodyError(f"invalid index.json at {self.url}: {exc}") from exc
         path = root / "index.json"
         try:
             return Index.model_validate(json.loads(path.read_text(encoding="utf-8")))
         except FileNotFoundError as exc:
             raise AntibodyError(f"registry {self.url} has no index.json") from exc
-        except (ValueError, ValidationError) as exc:
+        except ValidationError as exc:
+            raise AntibodyError(f"invalid index.json in {self.url}: {describe(exc)}") from exc
+        except ValueError as exc:
             raise AntibodyError(f"invalid index.json in {self.url}: {exc}") from exc
 
     def resolve(self, pack_id: str, version: str | None) -> tuple[str, IndexVersion]:

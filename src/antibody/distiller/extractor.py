@@ -21,7 +21,7 @@ from pydantic import BaseModel, ConfigDict, ValidationError
 
 from antibody.ast_engine import parser
 from antibody.distiller.templates import grammar_of
-from antibody.errors import AntibodyError
+from antibody.errors import AntibodyError, describe
 
 PRAGMAS = (
     "PRAGMA journal_mode=WAL",
@@ -317,7 +317,7 @@ def from_tape(path: Path, step: int | None) -> list[Failure]:
                 for r in conn.execute(query + " ORDER BY s.step_idx, t.id", params)
             ]
         except ValidationError as exc:
-            raise AntibodyError(f"{path}: malformed steps row: {exc}") from exc
+            raise AntibodyError(f"{path}: malformed steps row: {describe(exc)}") from exc
     if step is not None and not rows:
         raise AntibodyError(f"{path}: no step {step}")
     repo = Path(meta[0])

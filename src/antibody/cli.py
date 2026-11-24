@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import functools
 import os
+import subprocess
 from collections.abc import Callable
 from pathlib import Path
 from typing import Annotated, ParamSpec, TypeVar
@@ -159,20 +160,35 @@ def test_cmd(pack_dir: Annotated[Path | None, typer.Argument()] = None) -> None:
         if lock is None or not lock.installed:
             raise AntibodyError("no installed packs; run `antibody pull <pack>` first")
         packs = [(e.id, resolve_inside(root, e.install_path)) for e in lock.installed]
-    failed = False
+    failures: list[str] = []
     for name, directory in packs:
         if not directory.is_dir():
             raise AntibodyError(f"no such pack directory: {directory}")
         typer.echo(f"== {name}")
         report = lint_pack(directory)
         _print_report(report)
-        failed |= not report.ok
+        failures += [
+            f"{name}: gate {r.gate} {r.subject} failed" + (f" ({r.detail})" if r.detail else "")
+            for r in report.results
+            if not r.ok
+        ]
         if list((directory / "evals").glob("test_*.py")):
             result = run_pack_evals(directory)
             typer.echo(result.stdout, nl=False)
-            failed |= result.returncode not in (0, 5)
+            if result.returncode not in (0, 5):  # 5 = no tests collected
+                failures.append(f"{name}: evals failed: {_eval_failure(result)}")
+    if failures:
+        raise GateFailure("; ".join(failures))
+
+
+def _eval_failure(result: subprocess.CompletedProcess[str]) -> str:
+    """The failing test ids, else the last line pytest (or python) wrote to stderr."""
+    failed = [ln.removeprefix("FAILED ") for ln in result.stdout.splitlines()
+              if ln.startswith(("FAILED ", "ERROR "))]  # fmt: skip
     if failed:
-        raise GateFailure("validation gate or eval failure")
+        return ", ".join(failed)
+    lines = [ln for ln in (result.stderr + result.stdout).splitlines() if ln.strip()]
+    return lines[-1] if lines else f"pytest exited {result.returncode}"
 
 
 @app.command()

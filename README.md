@@ -342,7 +342,7 @@ Runs the 5 gates and prints one `PASS`/`FAIL` line per gate and vaccine. Exit 11
 
 ### `antibody test [PACK_DIR]`
 
-Runs the 5 gates and then the pack's own `evals/test_*.py` with `python -m pytest`, in a subprocess isolated from your project's pytest config (`-c /dev/null`, its own rootdir, no cache, no bytecode). Without `PACK_DIR`, tests every installed pack from the lockfile. Exit 11 on any gate or eval failure. This is the only command that executes code from a pack.
+Runs the 5 gates and then the pack's own `evals/test_*.py` with `python -m pytest`, in a subprocess isolated from your project's pytest config (`-c /dev/null`, its own rootdir, no cache, no bytecode). Without `PACK_DIR`, tests every installed pack from the lockfile. Exit 11 on any gate or eval failure; the error line names each failing pack and gate (or failing eval test, or the reason pytest could not run). `pytest` is a runtime dependency, so this works in a plain `uv tool install` / `pip install`. This is the only command that executes code from a pack.
 
 ### `antibody distill (--from-tape T... | --from-flight-db DB | --from-diff P) --out DIR [--step N]`
 
@@ -434,8 +434,10 @@ from antibody.validator import runner
 
 FIXTURE = Path(__file__).parent / "fixtures" / "py-no-deleted-assertions"
 
+
 def test_py_no_deleted_assertions_positive_antigen() -> None:
     assert runner.run_positive_antigen(FIXTURE) is Outcome.VIOLATION
+
 
 def test_py_no_deleted_assertions_negative_control() -> None:
     assert runner.run_negative_control(FIXTURE) is Outcome.ALLOW
