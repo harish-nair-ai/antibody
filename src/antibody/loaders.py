@@ -8,7 +8,7 @@ from typing import Any, TypeVar
 
 from pydantic import BaseModel, ValidationError
 
-from antibody.errors import AntibodyError, GateFailure
+from antibody.errors import AntibodyError, GateFailure, describe
 from antibody.fsutil import resolve_inside
 from antibody.models import PackManifest, Rule, RuleFile, Vaccine
 
@@ -21,7 +21,9 @@ def _parse(model: type[M], path: Path) -> M:
         return model.model_validate(data)
     except FileNotFoundError as exc:
         raise GateFailure(f"missing file: {path}") from exc
-    except (tomllib.TOMLDecodeError, ValidationError, UnicodeDecodeError) as exc:
+    except ValidationError as exc:
+        raise GateFailure(f"invalid {path.name}: {describe(exc)}") from exc
+    except (tomllib.TOMLDecodeError, UnicodeDecodeError) as exc:
         raise GateFailure(f"invalid {path.name}: {exc}") from exc
 
 

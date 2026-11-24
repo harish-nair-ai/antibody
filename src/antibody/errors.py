@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pydantic import ValidationError
+
 EXIT_USAGE = 2
 EXIT_GATE = 11
 EXIT_HASH = 12
@@ -24,3 +26,28 @@ class IntegrityError(AntibodyError):
 
 class DistillError(AntibodyError):
     exit_code = EXIT_DISTILL
+
+
+WORDING = (
+    ("Field required", "missing required key"),
+    ("Input should be", "must be"),
+    ("String should", "must"),
+    ("List should", "must"),
+)
+
+
+def describe(exc: ValidationError) -> str:
+    """`key.path: problem (got value)` per error, without pydantic model names or URLs."""
+    parts = []
+    for err in exc.errors(include_url=False):
+        loc = ".".join(str(p) for p in err["loc"]) or "(top level)"
+        if err["type"] == "extra_forbidden":
+            parts.append(f"{loc}: unknown key")
+            continue
+        msg = err["msg"].removeprefix("Value error, ")
+        for pydantic_text, human in WORDING:
+            msg = msg.replace(pydantic_text, human)
+        got = err.get("input")
+        suffix = "" if err["type"] == "missing" or isinstance(got, dict) else f" (got {got!r})"
+        parts.append(f"{loc}: {msg}{suffix}")
+    return "; ".join(parts)

@@ -8,7 +8,7 @@ from pathlib import Path
 import tomlkit
 from pydantic import ValidationError
 
-from antibody.errors import AntibodyError
+from antibody.errors import AntibodyError, describe
 from antibody.fsutil import atomic_write, resolve_inside
 from antibody.models import Lockfile
 from antibody.registry.hasher import tree_sha256
@@ -22,7 +22,9 @@ def read_lockfile(root: Path) -> Lockfile | None:
         return None
     try:
         return Lockfile.model_validate(tomllib.loads(path.read_text(encoding="utf-8")))
-    except (tomllib.TOMLDecodeError, ValidationError, UnicodeDecodeError) as exc:
+    except ValidationError as exc:
+        raise AntibodyError(f"invalid {LOCK_NAME}: {describe(exc)}") from exc
+    except (tomllib.TOMLDecodeError, UnicodeDecodeError) as exc:
         raise AntibodyError(f"invalid {LOCK_NAME}: {exc}") from exc
 
 

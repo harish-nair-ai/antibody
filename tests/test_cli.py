@@ -82,6 +82,25 @@ def test_test_command_runs_gates_and_real_pytest_evals(workspace: Path, tmp_path
     assert f"{pack}: gate positive_antigen sh-no-sudo failed" in gate.stderr
 
 
+def test_schema_errors_are_concise_and_human(workspace: Path, tmp_path: Path) -> None:
+    runner = CliRunner()
+    pack = make_pack(tmp_path / "p")
+    manifest = pack / "pack.toml"
+    manifest.write_text(manifest.read_text().replace('severity = "high"', 'severity = "huge"'))
+    lint = runner.invoke(app, ["lint", str(pack)])
+    assert lint.exit_code == 11
+    assert (
+        "invalid pack.toml: vaccines.0.severity: must be 'critical', 'high', 'medium' or 'low' "
+        "(got 'huge')"
+    ) in lint.stdout
+    (workspace / "antibody.lock").write_text('schema_version = "0.1"\nregistry = "x"\n')
+    verify = runner.invoke(app, ["verify"])
+    assert verify.exit_code == 2
+    assert verify.stderr == (
+        "error: invalid antibody.lock: registry_url: missing required key; registry: unknown key\n"
+    )
+
+
 def test_test_command_on_installed_packs(workspace: Path) -> None:
     runner = CliRunner()
     nothing = runner.invoke(app, ["test"])
