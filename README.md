@@ -6,7 +6,7 @@ A package manager for coding-agent failure modes: install "vaccines" (declarativ
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 [![CI](https://github.com/harish-nair-ai/antibody/actions/workflows/ci.yml/badge.svg)](https://github.com/harish-nair-ai/antibody/actions/workflows/ci.yml)
 
-[![Watch the 90-second explainer](assets/hero.gif)](assets/explainer.mp4)
+[![Watch the 95-second explainer](assets/hero.gif)](assets/explainer.mp4)
 
 ▶ Watch the full narrated explainer ([assets/explainer.mp4](assets/explainer.mp4))
 
