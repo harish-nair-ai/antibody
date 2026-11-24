@@ -37,7 +37,7 @@ dev = ["pytest>=8.2.0", "pytest-asyncio>=0.24.0", "ruff>=0.6.0", "mypy>=1.11"]
 line-length = 100
 target-version = "py311"
 # Antigen fixtures intentionally contain the bad code the vaccines detect.
-extend-exclude = ["src/antibody/starter_registry/packs/*/*/evals/fixtures"]
+extend-exclude = ["src/antibody/starter_registry/packs/*/*/evals/fixtures", "*.md"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
