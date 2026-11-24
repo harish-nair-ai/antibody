@@ -10,7 +10,7 @@ from antibody.models import AstRule, ShellRule
 from antibody.shell_engine import shell_fires, shell_units
 
 ASSERTS = (
-    '[(assert_statement) @target (call function: (attribute attribute: (identifier) @fn '
+    "[(assert_statement) @target (call function: (attribute attribute: (identifier) @fn "
     '(#match? @fn "^assert"))) @target]'
 )
 

@@ -118,7 +118,9 @@ def test_verify_lockfile_reports_tamper_missing_and_traversal(tmp_path: Path) ->
     pack = tmp_path / ".flywire/packs/core/alpha"
     _write(pack, "rules/r.toml", b"x = 1\n")
     good = _entry("core/alpha", tree_sha256(pack))
-    lock = Lockfile(schema_version="0.1", registry_url="bundled://starter_registry", installed=(good,))
+    lock = Lockfile(
+        schema_version="0.1", registry_url="bundled://starter_registry", installed=(good,)
+    )
     assert verify_lockfile(tmp_path, lock) == []
     _write(pack, "rules/r.toml", b"x = 2\n")
     assert "core/alpha" in verify_lockfile(tmp_path, lock)[0]

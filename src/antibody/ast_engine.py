@@ -104,7 +104,9 @@ def evaluate_ast(rule: AstRule, rel_path: str, pre: bytes, post: bytes) -> Outco
     post_count, post_err = count_captures(grammar, query, post, rule.capture)
     if pre_err or post_err:
         side = "pre" if pre_err else "post"
-        print(f"warning: {rule.id}: {side} parse error in {rel_path}; rule skipped", file=sys.stderr)
+        print(
+            f"warning: {rule.id}: {side} parse error in {rel_path}; rule skipped", file=sys.stderr
+        )
         return Outcome.SKIPPED
     if rule.check == "node_count_decreased":
         violated = post_count < pre_count

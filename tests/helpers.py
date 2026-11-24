@@ -53,7 +53,7 @@ message = "sudo is not allowed."
 remediation = "Run without sudo."
 """
 
-EVALS = '''\
+EVALS = """\
 from pathlib import Path
 
 from antibody.ast_engine import Outcome
@@ -76,7 +76,7 @@ def test_sh_no_sudo_positive_antigen() -> None:
 
 def test_sh_no_sudo_negative_control() -> None:
     assert runner.run_negative_control(FIXTURES / "sh-no-sudo") is Outcome.ALLOW
-'''
+"""
 
 FILES: dict[str, str] = {
     "rules/py_no_eval.toml": PY_RULE,

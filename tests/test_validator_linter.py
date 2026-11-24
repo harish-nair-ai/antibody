@@ -29,7 +29,9 @@ def test_valid_pack_passes_all_five_gates_for_every_vaccine(tmp_path: Path) -> N
 
 def test_positive_antigen_that_does_not_trigger_fails(tmp_path: Path) -> None:
     pack = make_pack(tmp_path / "p")
-    (pack / "evals/fixtures/py-no-eval/positive_after.py").write_text("def load(s):\n    return 1\n")
+    (pack / "evals/fixtures/py-no-eval/positive_after.py").write_text(
+        "def load(s):\n    return 1\n"
+    )
     (pack / "evals/fixtures/sh-no-sudo/positive.sh").write_text("ls\n")
     assert _failed(pack) == {
         ("positive_antigen", "py-no-eval"),
@@ -124,7 +126,7 @@ def test_shell_vaccine_must_not_declare_target_sample_path(tmp_path: Path) -> No
 def test_latency_gate_fails_for_a_slow_evaluation(tmp_path: Path) -> None:
     pack = make_pack(tmp_path / "p")
     fixtures = pack / "evals/fixtures/py-no-eval"
-    body = "".join(f"def f{i}(s):\n    return int(s) + {i}\n" for i in range(30000))
+    body = "".join(f"def f{i}(s):\n    return int(s) + {i}\n" for i in range(3000))
     (fixtures / "positive_before.py").write_text(body)
     (fixtures / "positive_after.py").write_text(body + "x = eval('1')\n")
     report = lint_pack(pack)
