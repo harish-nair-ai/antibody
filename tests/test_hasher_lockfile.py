@@ -6,6 +6,8 @@ import tomllib
 from pathlib import Path
 
 import pytest
+from antibody.cli import app
+from typer.testing import CliRunner
 
 from antibody.errors import AntibodyError
 from antibody.models import LockEntry, Lockfile
@@ -131,3 +133,20 @@ def test_verify_lockfile_reports_tamper_missing_and_traversal(tmp_path: Path) ->
     escape = good.model_copy(update={"install_path": "../outside"})
     evil = Lockfile(schema_version="0.1", registry_url="x", installed=(escape,))
     assert "outside" in verify_lockfile(tmp_path, evil)[0]
+
+
+def test_cli_verify_detects_one_byte_tamper_in_rule_toml(workspace: Path) -> None:
+    """Spec §8 test_hasher_lockfile: pull core/python-safety, verify 0, flip 1 byte, verify 12."""
+    runner = CliRunner()
+    pulled = runner.invoke(app, ["pull", "core/python-safety"])
+    assert pulled.exit_code == 0, pulled.stderr
+    ok = runner.invoke(app, ["verify"])
+    assert ok.exit_code == 0, ok.stderr
+    rule = workspace / ".flywire/packs/core/python-safety/rules/py_no_eval_exec.toml"
+    data = bytearray(rule.read_bytes())
+    data[0] ^= 0x01
+    rule.write_bytes(bytes(data))
+    tampered = runner.invoke(app, ["verify"])
+    assert tampered.exit_code == 12
+    assert "core/python-safety" in tampered.stderr
+    assert "Traceback" not in tampered.stderr + tampered.stdout

@@ -13,8 +13,10 @@ from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
+from antibody.cli import app
 from conftest import git
 from helpers import make_registry, reindex
+from typer.testing import CliRunner
 
 from antibody.errors import AntibodyError, GateFailure, IntegrityError
 from antibody.installer import envelope_sync
@@ -350,6 +352,76 @@ def test_sync_restores_pinned_versions_and_detects_registry_drift(
     with pytest.raises(IntegrityError):
         sync(workspace, RegistryClient(str(reg)))
     assert not _installed(workspace).exists()
+
+
+def test_cli_pull_local_registry_offline_fallback_envelope_and_clean_remove(
+    workspace: Path,
+    http_registry: tuple[str, Path, http.server.ThreadingHTTPServer],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Spec §8 test_registry_pull, end to end through the CLI."""
+    url, served, server = http_registry
+    runner = CliRunner()
+    (workspace / "envelope.toml").write_text(ENVELOPE)
+    local = runner.invoke(app, ["pull", "acme/demo", "--registry", str(served)])
+    assert local.exit_code == 0, local.stderr
+    assert "acme/demo@0.1.0" in local.stdout
+    envelope = (workspace / "envelope.toml").read_text()
+    assert "# shell safety" in envelope and "# review limit" in envelope
+    assert tomllib.loads(envelope)["envelope"]["packs"] == ["core/git-hygiene", "acme/demo"]
+    assert runner.invoke(app, ["remove", "acme/demo"]).exit_code == 0
+    assert not _installed(workspace).exists()
+    assert tomllib.loads((workspace / "envelope.toml").read_text())["envelope"]["packs"] == [
+        "core/git-hygiene"
+    ]
+    lock = read_lockfile(workspace)
+    assert lock is not None and lock.installed == ()
+
+    monkeypatch.setenv("ANTIBODY_REGISTRY", url)
+    online = runner.invoke(app, ["pull", "acme/demo"])
+    assert online.exit_code == 0, online.stderr
+    server.shutdown()
+    server.server_close()
+    shutil.rmtree(workspace / ".flywire")
+    offline = runner.invoke(app, ["pull", "acme/demo"])
+    assert offline.exit_code == 0, offline.stderr
+    assert "warning: using cached" in offline.stderr
+    assert runner.invoke(app, ["verify"]).exit_code == 0
+    missing = runner.invoke(app, ["remove", "acme/nope"])
+    assert missing.exit_code == 2
+    assert missing.stderr.startswith("error: ")
+
+
+def test_cli_pull_exit_codes(workspace: Path, tmp_path: Path) -> None:
+    runner = CliRunner()
+    assert runner.invoke(app, ["pull", "core/does-not-exist"]).exit_code == 2
+    assert runner.invoke(app, ["pull", "not-a-ref"]).exit_code == 2
+    reg = make_registry(tmp_path / "reg", "demo")
+    rule = reg / "packs/acme/demo/rules/py_no_eval.toml"
+    rule.write_bytes(rule.read_bytes() + b"\n")
+    mismatch = runner.invoke(app, ["pull", "acme/demo", "--registry", str(reg)])
+    assert mismatch.exit_code == 12
+    assert "sha256 mismatch" in mismatch.stderr
+    rule.write_text(rule.read_text().replace("(call function:", "(kall function:"))
+    reindex(reg)
+    broken = runner.invoke(app, ["pull", "acme/demo", "--registry", str(reg)])
+    assert broken.exit_code == 11
+    assert not _installed(workspace).exists()
+
+
+def test_cli_sync_restores_and_reports_drift(workspace: Path, tmp_path: Path) -> None:
+    runner = CliRunner()
+    reg = make_registry(tmp_path / "reg", "demo")
+    assert runner.invoke(app, ["pull", "acme/demo", "--registry", str(reg)]).exit_code == 0
+    shutil.rmtree(workspace / ".flywire")
+    restored = runner.invoke(app, ["sync"])
+    assert restored.exit_code == 0, restored.stderr
+    assert runner.invoke(app, ["verify"]).exit_code == 0
+    rule = reg / "packs/acme/demo/rules/sh_no_sudo.toml"
+    rule.write_text(rule.read_text().replace("sudo is", "sudo was"))
+    reindex(reg)
+    shutil.rmtree(workspace / ".flywire")
+    assert runner.invoke(app, ["sync"]).exit_code == 12
 
 
 def test_sync_without_lockfile_is_usage_error(workspace: Path) -> None:

@@ -5,7 +5,9 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+from antibody.cli import app
 from helpers import make_registry
+from typer.testing import CliRunner
 
 from antibody.errors import AntibodyError
 from antibody.installer.agents_md_sync import remove_block, upsert_block
@@ -109,6 +111,21 @@ def test_pull_patch_agents_md_twice_is_idempotent_and_remove_is_clean(
     assert not (workspace / "CLAUDE.md").exists()
     remove(workspace, "acme/demo")
     assert agents.read_bytes() == USER.encode()
+
+
+def test_cli_pull_patch_agents_md_twice_bundled_python_safety(workspace: Path) -> None:
+    runner = CliRunner()
+    agents = workspace / "AGENTS.md"
+    agents.write_text(USER)
+    for _ in range(2):
+        result = runner.invoke(app, ["pull", "core/python-safety", "--patch-agents-md"])
+        assert result.exit_code == 0, result.stderr
+    text = agents.read_text()
+    assert text.startswith(USER)
+    assert text.count('<!-- antibody:start pack="core/python-safety" version="0.1.0" -->') == 1
+    assert "- Never delete or comment out assertions in `tests/` to make CI pass.\n" in text
+    assert runner.invoke(app, ["remove", "core/python-safety"]).exit_code == 0
+    assert agents.read_text() == USER
 
 
 def test_claude_md_patched_only_if_it_exists(workspace: Path, tmp_path: Path) -> None:
