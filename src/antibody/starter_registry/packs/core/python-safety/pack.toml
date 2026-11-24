@@ -1,0 +1,73 @@
+[pack]
+namespace = "core"
+name = "python-safety"
+version = "0.1.0"
+description = "Blocks test weakening, insecure defaults, and silent exception swallowing."
+authors = ["flywire-maintainers"]
+license = "MIT"
+languages = ["python"]
+categories = ["test-tampering", "security-regression", "reliability"]
+flywire_min_version = "0.1.0"
+
+[[vaccines]]
+rule_id = "py-no-deleted-assertions"
+rule_file = "rules/py_no_deleted_assertions.toml"
+fixture_dir = "evals/fixtures/py-no-deleted-assertions"
+target_sample_path = "tests/test_sample.py"
+severity = "critical"
+cwe = "CWE-693"
+summary = "Prevents agents from deleting assertions to fake passing tests."
+
+[[vaccines]]
+rule_id = "py-no-bare-except-pass"
+rule_file = "rules/py_no_bare_except_pass.toml"
+fixture_dir = "evals/fixtures/py-no-bare-except-pass"
+target_sample_path = "src/sample.py"
+severity = "high"
+cwe = "CWE-390"
+summary = "Blocks new `except ...: pass` handlers that silently swallow failures."
+
+[[vaccines]]
+rule_id = "py-no-ssl-verify-false"
+rule_file = "rules/py_no_ssl_verify_false.toml"
+fixture_dir = "evals/fixtures/py-no-ssl-verify-false"
+target_sample_path = "src/sample.py"
+severity = "critical"
+cwe = "CWE-295"
+summary = "Blocks disabling TLS certificate verification in HTTP clients."
+
+[[vaccines]]
+rule_id = "py-no-shell-true"
+rule_file = "rules/py_no_shell_true.toml"
+fixture_dir = "evals/fixtures/py-no-shell-true"
+target_sample_path = "src/sample.py"
+severity = "critical"
+cwe = "CWE-78"
+summary = "Blocks `shell=True` subprocess calls (command injection risk)."
+
+[[vaccines]]
+rule_id = "py-no-lint-suppression"
+rule_file = "rules/py_no_lint_suppression.toml"
+fixture_dir = "evals/fixtures/py-no-lint-suppression"
+target_sample_path = "src/sample.py"
+severity = "medium"
+cwe = "CWE-710"
+summary = "Blocks new lint/type-checker suppression comments."
+
+[[vaccines]]
+rule_id = "py-no-sql-fstring"
+rule_file = "rules/py_no_sql_fstring.toml"
+fixture_dir = "evals/fixtures/py-no-sql-fstring"
+target_sample_path = "src/sample.py"
+severity = "critical"
+cwe = "CWE-89"
+summary = "Blocks f-string SQL passed to `.execute()` (SQL injection)."
+
+[[vaccines]]
+rule_id = "py-no-eval-exec"
+rule_file = "rules/py_no_eval_exec.toml"
+fixture_dir = "evals/fixtures/py-no-eval-exec"
+target_sample_path = "src/sample.py"
+severity = "critical"
+cwe = "CWE-95"
+summary = "Blocks new `eval()` / `exec()` calls (code injection)."

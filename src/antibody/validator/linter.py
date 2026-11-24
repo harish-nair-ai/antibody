@@ -14,7 +14,7 @@ from antibody.errors import AntibodyError, GateFailure
 from antibody.fsutil import resolve_inside
 from antibody.loaders import load_manifest, load_vaccine_rule, pack_path
 from antibody.models import AstRule, PackManifest, Rule, Vaccine
-from antibody.validator.runner import evaluate_fixture, measure_latency_ms
+from antibody.validator.runner import Kind, evaluate_fixture, measure_latency_ms
 
 GATES = ("schema", "ast_compile", "positive_antigen", "negative_control", "latency")
 MEDIAN_BUDGET_MS = 5.0
@@ -68,8 +68,8 @@ def _check_rule_files(pack_dir: Path, manifest: PackManifest) -> GateResult:
     return GateResult("schema", "pack", not problems, "; ".join(problems))
 
 
-def _fixture_gate(gate: str, rule: Rule, fixture_dir: Path, vaccine: Vaccine) -> GateResult:
-    kind = "positive" if gate == "positive_antigen" else "negative"
+def _fixture_gate(kind: Kind, rule: Rule, fixture_dir: Path, vaccine: Vaccine) -> GateResult:
+    gate = "positive_antigen" if kind == "positive" else "negative_control"
     expected = Outcome.VIOLATION if kind == "positive" else Outcome.ALLOW
     target = vaccine.target_sample_path
     if isinstance(rule, AstRule) and target is not None and not rule_applies(rule, target):
@@ -102,8 +102,8 @@ def _lint_vaccine(pack_dir: Path, vaccine: Vaccine) -> list[GateResult]:
         return [*results, GateResult("ast_compile", subject, False, str(exc))]
     results.append(GateResult("ast_compile", subject, True))
     fixtures = [
-        _fixture_gate("positive_antigen", rule, fixture_dir, vaccine),
-        _fixture_gate("negative_control", rule, fixture_dir, vaccine),
+        _fixture_gate("positive", rule, fixture_dir, vaccine),
+        _fixture_gate("negative", rule, fixture_dir, vaccine),
     ]
     results += fixtures
     if all(r.ok for r in fixtures):

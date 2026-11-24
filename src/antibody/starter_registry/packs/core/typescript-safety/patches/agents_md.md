@@ -1,0 +1,4 @@
+- Never delete `expect()` calls or add `.skip`/`.only` to make tests pass.
+- Never add `@ts-ignore`/`@ts-nocheck` or explicit `any`; fix the types.
+- Never use `dangerouslySetInnerHTML`; render text or sanitize with a vetted library.
+- Never leave a `catch {}` block empty; handle, log, or rethrow.

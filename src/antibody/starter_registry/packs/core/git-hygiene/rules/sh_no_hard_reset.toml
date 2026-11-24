@@ -1,0 +1,6 @@
+[[shell_rules]]
+id = "sh-no-hard-reset"
+pattern = '''^git\s+(?:reset\b.*\s--hard(?:\s|$)|clean\b(?=.*\s-[a-zA-Z]*f)(?=.*\s-[a-zA-Z]*d))'''
+severity = "hard_block"
+message = "Destructive git reset/clean detected."
+remediation = "Use `git stash` or targeted `git checkout -- <file>` instead."

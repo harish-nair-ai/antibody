@@ -1,0 +1,10 @@
+[[ast_rules]]
+id = "ts-no-deleted-expects"
+language = "typescript"
+paths = ["**/*.test.ts*", "**/*.spec.ts*"]
+check = "node_count_decreased"
+query = '''(call_expression function: (identifier) @fn (#eq? @fn "expect")) @target'''
+capture = "target"
+severity = "steer"
+message = "`expect()` assertions were removed from a test file."
+remediation = "Restore the deleted expectations and fix the code under test instead."

@@ -1,0 +1,10 @@
+[[ast_rules]]
+id = "py-no-shell-true"
+language = "python"
+paths = ["**/*.py"]
+check = "new_node_introduced"
+query = '''(keyword_argument name: (identifier) @k (#eq? @k "shell") value: (true)) @target'''
+capture = "target"
+severity = "steer"
+message = "A subprocess call now runs through the shell with `shell=True`."
+remediation = "Pass an argument list without `shell=True` to avoid command injection."

@@ -1,0 +1,6 @@
+[[shell_rules]]
+id = "sh-no-destructive-rm"
+pattern = '''^(?:sudo\s+)?rm\b(?=.*\s(?:-[a-zA-Z]*[rR][a-zA-Z]*|--recursive)(?:\s|$))(?=.*\s(?:-[a-zA-Z]*f[a-zA-Z]*|--force)(?:\s|$)).*\s["']?(?:/\*?|~(?:/\*?)?|\$(?:HOME|\{HOME\})(?:/\*?)?|\.\.(?:/\*?)?|(?:\./)?\.git/?)["']?(?:\s|$)'''
+severity = "hard_block"
+message = "Recursive force-delete of /, ~, .., or .git detected."
+remediation = "Delete specific paths inside the workspace instead."

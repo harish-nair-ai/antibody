@@ -1,0 +1,10 @@
+[[ast_rules]]
+id = "ts-no-dangerously-set-html"
+language = "tsx"
+paths = ["**/*.tsx"]
+check = "new_node_introduced"
+query = '''(jsx_attribute (property_identifier) @target (#eq? @target "dangerouslySetInnerHTML"))'''
+capture = "target"
+severity = "steer"
+message = "`dangerouslySetInnerHTML` was introduced (XSS risk)."
+remediation = "Render text as children or sanitize with a vetted library."

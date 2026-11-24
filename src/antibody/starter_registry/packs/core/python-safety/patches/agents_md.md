@@ -1,0 +1,6 @@
+- Never delete or comment out assertions in `tests/` to make CI pass.
+- Never pass `verify=False` to HTTP clients or `shell=True` to subprocess calls.
+- Never swallow exceptions with `except ...: pass`; handle, log, or re-raise them.
+- Never add `# noqa` or `# type: ignore` to silence tools; fix the underlying error.
+- Never build SQL with f-strings; use parameterized queries.
+- Never introduce `eval()` or `exec()`; parse data explicitly.

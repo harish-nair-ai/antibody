@@ -1,0 +1,63 @@
+[pack]
+namespace = "core"
+name = "typescript-safety"
+version = "0.1.0"
+description = "Blocks deleted/skipped tests, compiler suppressions, `any`, XSS sinks, and empty catches."
+authors = ["flywire-maintainers"]
+license = "MIT"
+languages = ["typescript", "tsx"]
+categories = ["test-tampering", "security-regression", "reliability"]
+flywire_min_version = "0.1.0"
+
+[[vaccines]]
+rule_id = "ts-no-deleted-expects"
+rule_file = "rules/ts_no_deleted_expects.toml"
+fixture_dir = "evals/fixtures/ts-no-deleted-expects"
+target_sample_path = "src/sample.test.ts"
+severity = "critical"
+cwe = "CWE-693"
+summary = "Prevents agents from deleting `expect()` calls to fake passing tests."
+
+[[vaccines]]
+rule_id = "ts-no-skipped-tests"
+rule_file = "rules/ts_no_skipped_tests.toml"
+fixture_dir = "evals/fixtures/ts-no-skipped-tests"
+target_sample_path = "src/sample.test.ts"
+severity = "high"
+cwe = "CWE-693"
+summary = "Blocks `.skip` / `.only` added to test suites."
+
+[[vaccines]]
+rule_id = "ts-no-ts-ignore"
+rule_file = "rules/ts_no_ts_ignore.toml"
+fixture_dir = "evals/fixtures/ts-no-ts-ignore"
+target_sample_path = "src/sample.ts"
+severity = "medium"
+cwe = "CWE-710"
+summary = "Blocks new TypeScript compiler suppressions."
+
+[[vaccines]]
+rule_id = "ts-no-explicit-any"
+rule_file = "rules/ts_no_explicit_any.toml"
+fixture_dir = "evals/fixtures/ts-no-explicit-any"
+target_sample_path = "src/sample.ts"
+severity = "low"
+summary = "Blocks new explicit `any` annotations in `src/`."
+
+[[vaccines]]
+rule_id = "ts-no-dangerously-set-html"
+rule_file = "rules/ts_no_dangerously_set_html.toml"
+fixture_dir = "evals/fixtures/ts-no-dangerously-set-html"
+target_sample_path = "src/Sample.tsx"
+severity = "critical"
+cwe = "CWE-79"
+summary = "Blocks new `dangerouslySetInnerHTML` usage (XSS)."
+
+[[vaccines]]
+rule_id = "ts-no-empty-catch"
+rule_file = "rules/ts_no_empty_catch.toml"
+fixture_dir = "evals/fixtures/ts-no-empty-catch"
+target_sample_path = "src/sample.ts"
+severity = "high"
+cwe = "CWE-390"
+summary = "Blocks new empty `catch {}` blocks."

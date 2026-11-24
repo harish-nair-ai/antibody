@@ -1,0 +1,10 @@
+[[ast_rules]]
+id = "py-no-deleted-assertions"
+language = "python"
+paths = ["tests/**/*.py", "**/*_test.py", "**/test_*.py"]
+check = "node_count_decreased"
+query = '''[(assert_statement) @target (call function: (attribute attribute: (identifier) @fn (#match? @fn "^assert"))) @target]'''
+capture = "target"
+severity = "steer"
+message = "Test assertions were removed from a test file."
+remediation = "Restore the deleted assertions and fix the code under test instead."

@@ -1,0 +1,10 @@
+[[ast_rules]]
+id = "py-no-eval-exec"
+language = "python"
+paths = ["**/*.py"]
+check = "new_node_introduced"
+query = '''(call function: (identifier) @fn (#match? @fn "^(eval|exec)$")) @target'''
+capture = "target"
+severity = "steer"
+message = "A new `eval()` / `exec()` call was introduced."
+remediation = "Parse data explicitly (e.g. `json.loads`, `ast.literal_eval`) instead of executing it."

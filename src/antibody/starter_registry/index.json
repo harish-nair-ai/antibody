@@ -1,0 +1,144 @@
+{
+  "generated_at": "2026-11-24T00:00:00Z",
+  "packs": {
+    "core/git-hygiene": {
+      "description": "Blocks force-pushes to main, skipped hooks, hard resets, destructive rm, and curl-pipe-sh.",
+      "languages": [
+        "shell"
+      ],
+      "latest": "0.1.0",
+      "versions": {
+        "0.1.0": {
+          "files": [
+            "evals/fixtures/sh-no-destructive-rm/negative.sh",
+            "evals/fixtures/sh-no-destructive-rm/positive.sh",
+            "evals/fixtures/sh-no-force-push/negative.sh",
+            "evals/fixtures/sh-no-force-push/positive.sh",
+            "evals/fixtures/sh-no-hard-reset/negative.sh",
+            "evals/fixtures/sh-no-hard-reset/positive.sh",
+            "evals/fixtures/sh-no-pipe-to-shell/negative.sh",
+            "evals/fixtures/sh-no-pipe-to-shell/positive.sh",
+            "evals/fixtures/sh-no-skip-hooks/negative.sh",
+            "evals/fixtures/sh-no-skip-hooks/positive.sh",
+            "evals/test_vaccines.py",
+            "pack.toml",
+            "patches/agents_md.md",
+            "rules/sh_no_destructive_rm.toml",
+            "rules/sh_no_force_push.toml",
+            "rules/sh_no_hard_reset.toml",
+            "rules/sh_no_pipe_to_shell.toml",
+            "rules/sh_no_skip_hooks.toml"
+          ],
+          "path": "packs/core/git-hygiene",
+          "rule_count": 5,
+          "sha256": "b4d6337c0a430045acffbceddccbb0accdd23a0dd60109ff70bb65723016a935"
+        }
+      }
+    },
+    "core/python-safety": {
+      "description": "Blocks test weakening, insecure defaults, and silent exception swallowing.",
+      "languages": [
+        "python"
+      ],
+      "latest": "0.1.0",
+      "versions": {
+        "0.1.0": {
+          "files": [
+            "evals/fixtures/py-no-bare-except-pass/negative_after.py",
+            "evals/fixtures/py-no-bare-except-pass/negative_before.py",
+            "evals/fixtures/py-no-bare-except-pass/positive_after.py",
+            "evals/fixtures/py-no-bare-except-pass/positive_before.py",
+            "evals/fixtures/py-no-deleted-assertions/negative_after.py",
+            "evals/fixtures/py-no-deleted-assertions/negative_before.py",
+            "evals/fixtures/py-no-deleted-assertions/positive_after.py",
+            "evals/fixtures/py-no-deleted-assertions/positive_before.py",
+            "evals/fixtures/py-no-eval-exec/negative_after.py",
+            "evals/fixtures/py-no-eval-exec/negative_before.py",
+            "evals/fixtures/py-no-eval-exec/positive_after.py",
+            "evals/fixtures/py-no-eval-exec/positive_before.py",
+            "evals/fixtures/py-no-lint-suppression/negative_after.py",
+            "evals/fixtures/py-no-lint-suppression/negative_before.py",
+            "evals/fixtures/py-no-lint-suppression/positive_after.py",
+            "evals/fixtures/py-no-lint-suppression/positive_before.py",
+            "evals/fixtures/py-no-shell-true/negative_after.py",
+            "evals/fixtures/py-no-shell-true/negative_before.py",
+            "evals/fixtures/py-no-shell-true/positive_after.py",
+            "evals/fixtures/py-no-shell-true/positive_before.py",
+            "evals/fixtures/py-no-sql-fstring/negative_after.py",
+            "evals/fixtures/py-no-sql-fstring/negative_before.py",
+            "evals/fixtures/py-no-sql-fstring/positive_after.py",
+            "evals/fixtures/py-no-sql-fstring/positive_before.py",
+            "evals/fixtures/py-no-ssl-verify-false/negative_after.py",
+            "evals/fixtures/py-no-ssl-verify-false/negative_before.py",
+            "evals/fixtures/py-no-ssl-verify-false/positive_after.py",
+            "evals/fixtures/py-no-ssl-verify-false/positive_before.py",
+            "evals/test_vaccines.py",
+            "pack.toml",
+            "patches/agents_md.md",
+            "rules/py_no_bare_except_pass.toml",
+            "rules/py_no_deleted_assertions.toml",
+            "rules/py_no_eval_exec.toml",
+            "rules/py_no_lint_suppression.toml",
+            "rules/py_no_shell_true.toml",
+            "rules/py_no_sql_fstring.toml",
+            "rules/py_no_ssl_verify_false.toml"
+          ],
+          "path": "packs/core/python-safety",
+          "rule_count": 7,
+          "sha256": "e093250fd149949bb21e6caed09fb15d0c719c20203a4907b9214fe525e4d9ab"
+        }
+      }
+    },
+    "core/typescript-safety": {
+      "description": "Blocks deleted/skipped tests, compiler suppressions, `any`, XSS sinks, and empty catches.",
+      "languages": [
+        "typescript",
+        "tsx"
+      ],
+      "latest": "0.1.0",
+      "versions": {
+        "0.1.0": {
+          "files": [
+            "evals/fixtures/ts-no-dangerously-set-html/negative_after.tsx",
+            "evals/fixtures/ts-no-dangerously-set-html/negative_before.tsx",
+            "evals/fixtures/ts-no-dangerously-set-html/positive_after.tsx",
+            "evals/fixtures/ts-no-dangerously-set-html/positive_before.tsx",
+            "evals/fixtures/ts-no-deleted-expects/negative_after.ts",
+            "evals/fixtures/ts-no-deleted-expects/negative_before.ts",
+            "evals/fixtures/ts-no-deleted-expects/positive_after.ts",
+            "evals/fixtures/ts-no-deleted-expects/positive_before.ts",
+            "evals/fixtures/ts-no-empty-catch/negative_after.ts",
+            "evals/fixtures/ts-no-empty-catch/negative_before.ts",
+            "evals/fixtures/ts-no-empty-catch/positive_after.ts",
+            "evals/fixtures/ts-no-empty-catch/positive_before.ts",
+            "evals/fixtures/ts-no-explicit-any/negative_after.ts",
+            "evals/fixtures/ts-no-explicit-any/negative_before.ts",
+            "evals/fixtures/ts-no-explicit-any/positive_after.ts",
+            "evals/fixtures/ts-no-explicit-any/positive_before.ts",
+            "evals/fixtures/ts-no-skipped-tests/negative_after.ts",
+            "evals/fixtures/ts-no-skipped-tests/negative_before.ts",
+            "evals/fixtures/ts-no-skipped-tests/positive_after.ts",
+            "evals/fixtures/ts-no-skipped-tests/positive_before.ts",
+            "evals/fixtures/ts-no-ts-ignore/negative_after.ts",
+            "evals/fixtures/ts-no-ts-ignore/negative_before.ts",
+            "evals/fixtures/ts-no-ts-ignore/positive_after.ts",
+            "evals/fixtures/ts-no-ts-ignore/positive_before.ts",
+            "evals/test_vaccines.py",
+            "pack.toml",
+            "patches/agents_md.md",
+            "rules/ts_no_dangerously_set_html.toml",
+            "rules/ts_no_deleted_expects.toml",
+            "rules/ts_no_empty_catch.toml",
+            "rules/ts_no_explicit_any.toml",
+            "rules/ts_no_skipped_tests.toml",
+            "rules/ts_no_ts_ignore.toml"
+          ],
+          "path": "packs/core/typescript-safety",
+          "rule_count": 6,
+          "sha256": "251c8b1226917bedf95829fbd791e4111c84082d8536ad063d54c099b2b7dcd3"
+        }
+      }
+    }
+  },
+  "schema_version": "0.1"
+}

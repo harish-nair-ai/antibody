@@ -1,0 +1,10 @@
+[[ast_rules]]
+id = "ts-no-empty-catch"
+language = "typescript"
+paths = ["**/*.ts", "**/*.tsx"]
+check = "new_node_introduced"
+query = '''(catch_clause body: (statement_block) @target (#match? @target "^\\{\\s*\\}$"))'''
+capture = "target"
+severity = "steer"
+message = "A new empty `catch {}` block silently swallows errors."
+remediation = "Handle, log, or rethrow the error inside the catch block."

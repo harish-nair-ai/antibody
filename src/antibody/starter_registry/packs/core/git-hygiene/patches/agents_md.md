@@ -1,0 +1,5 @@
+- Never force-push to `main`/`master`; push a branch and open a PR.
+- Never skip git hooks with `--no-verify` or `git commit -n`.
+- Never run `git reset --hard` or `git clean -fd`; use `git stash`.
+- Never `rm -rf` `/`, `~`, `..`, or `.git`.
+- Never pipe `curl`/`wget` output into a shell; download, review, then run.

@@ -1,0 +1,10 @@
+[[ast_rules]]
+id = "py-no-ssl-verify-false"
+language = "python"
+paths = ["**/*.py"]
+check = "new_node_introduced"
+query = '''(keyword_argument name: (identifier) @k (#eq? @k "verify") value: (false)) @target'''
+capture = "target"
+severity = "steer"
+message = "TLS certificate verification was disabled with `verify=False`."
+remediation = "Keep verification on; pass a CA bundle path via `verify=` if needed."

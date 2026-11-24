@@ -1,0 +1,10 @@
+[[ast_rules]]
+id = "py-no-bare-except-pass"
+language = "python"
+paths = ["**/*.py"]
+check = "new_node_introduced"
+query = '''(except_clause (block (pass_statement)) @target)'''
+capture = "target"
+severity = "steer"
+message = "A new exception handler silently swallows errors with `pass`."
+remediation = "Handle the specific exception (log, recover, or re-raise) instead of passing."

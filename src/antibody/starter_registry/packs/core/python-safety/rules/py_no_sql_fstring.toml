@@ -1,0 +1,10 @@
+[[ast_rules]]
+id = "py-no-sql-fstring"
+language = "python"
+paths = ["**/*.py"]
+check = "new_node_introduced"
+query = '''(call function: (attribute attribute: (identifier) @fn) arguments: (argument_list . (string (string_start) @start)) (#match? @fn "^execute(many|script)?$") (#match? @start "^[a-zA-Z]*[fF]")) @target'''
+capture = "target"
+severity = "steer"
+message = "An f-string is passed directly to a SQL `.execute()` call."
+remediation = "Use a parameterized query: `cursor.execute(sql, params)`."

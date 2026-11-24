@@ -1,0 +1,6 @@
+[[shell_rules]]
+id = "sh-no-skip-hooks"
+pattern = '''^git\s+(?:commit|push)(?:\s+(?:[^\s'"]|'[^']*'|"(?:[^"\\]|\\.)*")+)*?\s+--no-verify(?=\s|$)|^git\s+commit(?:\s+(?:[^\s'"]|'[^']*'|"(?:[^"\\]|\\.)*")+)*?\s+-[abd-ln-su-zABD-EG-Z]*n[a-zA-Z]*(?=\s|$)'''
+severity = "hard_block"
+message = "Git hooks were bypassed with `--no-verify` / `-n`."
+remediation = "Run the hooks and fix what they report instead of skipping them."

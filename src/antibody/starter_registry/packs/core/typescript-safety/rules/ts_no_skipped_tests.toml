@@ -1,0 +1,10 @@
+[[ast_rules]]
+id = "ts-no-skipped-tests"
+language = "typescript"
+paths = ["**/*.test.ts*", "**/*.spec.ts*"]
+check = "new_node_introduced"
+query = '''(member_expression property: (property_identifier) @p (#match? @p "^(skip|only)$")) @target'''
+capture = "target"
+severity = "steer"
+message = "A test was skipped or focused with `.skip` / `.only`."
+remediation = "Remove `.skip`/`.only` and make the test pass."

@@ -14,6 +14,7 @@ from pathlib import PurePosixPath
 import tree_sitter_python
 import tree_sitter_typescript
 from pathspec import PathSpec
+from pathspec.pattern import Pattern
 from tree_sitter import Language, Parser, Query, QueryCursor, QueryError
 
 from antibody.errors import GateFailure
@@ -58,7 +59,7 @@ def compiled_query(grammar: str, source: str) -> Query:
 
 
 @cache
-def _pathspec(patterns: tuple[str, ...]) -> PathSpec:
+def _pathspec(patterns: tuple[str, ...]) -> PathSpec[Pattern]:
     # Contract §1.1 names "gitwildmatch"; pathspec>=1.0 deprecates the alias (same semantics).
     with warnings.catch_warnings(action="ignore", category=DeprecationWarning):
         return PathSpec.from_lines("gitwildmatch", patterns)

@@ -1,0 +1,10 @@
+[[ast_rules]]
+id = "py-no-lint-suppression"
+language = "python"
+paths = ["**/*.py"]
+check = "new_node_introduced"
+query = '''((comment) @target (#match? @target "(#\\s*noqa|#\\s*type:\\s*ignore)"))'''
+capture = "target"
+severity = "steer"
+message = "A new `# noqa` / `# type: ignore` suppression was added."
+remediation = "Fix the underlying lint or type error instead of suppressing it."

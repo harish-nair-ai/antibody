@@ -226,7 +226,14 @@ AST_CASES = [
         b"def q(c, uid):\n    log.info(f'{uid}')\n    return c.execute('SELECT ?', (uid,))\n",
         "allow",
     ),
-    ("core/python-safety", "py-no-eval-exec", "src/run.py", b"x = 1\n", b"exec(code)\n", "violation"),
+    (
+        "core/python-safety",
+        "py-no-eval-exec",
+        "src/run.py",
+        b"x = 1\n",
+        b"exec(code)\n",
+        "violation",
+    ),
     (
         "core/python-safety",
         "py-no-eval-exec",

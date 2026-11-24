@@ -1,0 +1,10 @@
+[[ast_rules]]
+id = "ts-no-explicit-any"
+language = "typescript"
+paths = ["src/**/*.ts*"]
+check = "new_node_introduced"
+query = '''((predefined_type) @target (#eq? @target "any"))'''
+capture = "target"
+severity = "steer"
+message = "A new explicit `any` type was introduced."
+remediation = "Use a precise type or `unknown` with narrowing."

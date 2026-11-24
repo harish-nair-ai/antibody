@@ -1,0 +1,6 @@
+[[shell_rules]]
+id = "sh-no-pipe-to-shell"
+pattern = '''\b(?:curl|wget)\b.*\|.*\b(?:sh|bash|zsh)\b|\b(?:sh|bash|zsh)\b.*<\(\s*(?:curl|wget)\b'''
+severity = "hard_block"
+message = "Piping downloaded content straight into a shell detected."
+remediation = "Download the script, review it, verify its checksum, then run it explicitly."

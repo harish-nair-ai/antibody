@@ -1,0 +1,46 @@
+[pack]
+namespace = "core"
+name = "git-hygiene"
+version = "0.1.0"
+description = "Blocks force-pushes to main, skipped hooks, hard resets, destructive rm, and curl-pipe-sh."
+authors = ["flywire-maintainers"]
+license = "MIT"
+languages = ["shell"]
+categories = ["destructive-ops", "security-regression"]
+flywire_min_version = "0.1.0"
+
+[[vaccines]]
+rule_id = "sh-no-force-push"
+rule_file = "rules/sh_no_force_push.toml"
+fixture_dir = "evals/fixtures/sh-no-force-push"
+severity = "critical"
+summary = "Blocks force-pushes (`--force`, `-f`, `--force-with-lease`, `+ref`) to main/master."
+
+[[vaccines]]
+rule_id = "sh-no-skip-hooks"
+rule_file = "rules/sh_no_skip_hooks.toml"
+fixture_dir = "evals/fixtures/sh-no-skip-hooks"
+severity = "high"
+summary = "Blocks `git commit/push --no-verify` and `git commit -n` (D5: `git push -n` is dry-run)."
+
+[[vaccines]]
+rule_id = "sh-no-hard-reset"
+rule_file = "rules/sh_no_hard_reset.toml"
+fixture_dir = "evals/fixtures/sh-no-hard-reset"
+severity = "critical"
+summary = "Blocks `git reset --hard` and `git clean -fd` that destroy uncommitted work."
+
+[[vaccines]]
+rule_id = "sh-no-destructive-rm"
+rule_file = "rules/sh_no_destructive_rm.toml"
+fixture_dir = "evals/fixtures/sh-no-destructive-rm"
+severity = "critical"
+summary = "Blocks `rm -rf` targeting /, ~, $HOME, .., or .git."
+
+[[vaccines]]
+rule_id = "sh-no-pipe-to-shell"
+rule_file = "rules/sh_no_pipe_to_shell.toml"
+fixture_dir = "evals/fixtures/sh-no-pipe-to-shell"
+severity = "critical"
+cwe = "CWE-494"
+summary = "Blocks `curl|wget ... | sh` remote code execution."

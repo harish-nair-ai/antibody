@@ -1,0 +1,10 @@
+[[ast_rules]]
+id = "ts-no-ts-ignore"
+language = "typescript"
+paths = ["**/*.ts", "**/*.tsx"]
+check = "new_node_introduced"
+query = '''((comment) @target (#match? @target "@ts-(ignore|nocheck)"))'''
+capture = "target"
+severity = "steer"
+message = "A new `@ts-ignore` / `@ts-nocheck` comment was added."
+remediation = "Fix the type error instead of suppressing the compiler."

@@ -1,0 +1,6 @@
+[[shell_rules]]
+id = "sh-no-force-push"
+pattern = '''^git\s+push\b(?=.*\s(?:--force(?:-with-lease)?(?:=\S*)?|-[a-zA-Z]*f[a-zA-Z]*|\+\S+)(?:\s|$))(?=.*(?<![\w-])(?:main|master)(?![\w-]))'''
+severity = "hard_block"
+message = "Force-push to main/master detected."
+remediation = "Push to a feature branch and open a pull request instead of rewriting main."
